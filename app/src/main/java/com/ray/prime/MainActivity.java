@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                System.out.println("IN RUN METHOD");
                 if (!isPaused) {
                     StringBuilder sb = new StringBuilder(textView.getText());
                     sb.append(getNextPattern());
@@ -124,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
     // This method is used for initialising the textView state after changing the settings.
     public void init() {
         bufferCounter = new BigInteger(currentSettings.getString(Constants.SEED));
-        System.out.println("BUFFER COUNTER: "+bufferCounter);
         displayCounter = bufferCounter;
 
         DELAY = Integer.valueOf(currentSettings.getString(Constants.DELAY_VALUE));
@@ -143,12 +141,14 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Height: "+height);
 
         int bufferLines = height / Float.valueOf(currentSettings.getString(Constants.TEXT_SIZE)).intValue();
+        if (bufferLines == 0) {
+            bufferLines = 10;
+        }
         System.out.println("Buffer Lines: "+ bufferLines);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i< bufferLines; i++) {
             String pattern = getNextPattern();
-            System.out.println(pattern);
             sb.append(pattern);
         }
 
@@ -179,15 +179,15 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             finishAffinity();
         } else if (item.getItemId() == R.id.settings_menu_item){
-            System.out.println("SETTINGS CLICKED");
             isPaused = true;
             Intent currentSettings = new Intent(this, SettingsActivity.class);
             Bundle preferences = new Bundle();
             preferences.putBundle(Constants.DEFAULTS, defaultSettings);
             preferences.putBundle(Constants.CURRENTS, this.currentSettings);
             currentSettings.putExtras(preferences);
-            System.out.println("CURRENT SETTINGS: "+currentSettings.getExtras());
             settingsLauncher.launch(currentSettings);
+        } else if (item.getItemId() == R.id.pause_resume_menu_item) {
+            isPaused = !isPaused;
         }
         return true;
     }
@@ -198,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     validateAndChangeSettings(result.getData().getExtras());
-                    System.out.println(currentSettings);
                     init();
                     isPaused = false;
                 }
@@ -233,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
         bufferCounter = bufferCounter.add(BigInteger.ONE);
         if (bufferCounter.compareTo(LIMIT) > 0) {
             bufferCounter = BigInteger.ZERO;
+            displayCounter = bufferCounter;
         }
 
         return sb.toString();
@@ -251,21 +251,21 @@ public class MainActivity extends AppCompatActivity {
 
         //Validate Delay
         try {
-            if (Integer.valueOf(changes.getString(Constants.DELAY_VALUE)) < 1) {
-                changes.putInt(Constants.DELAY_VALUE, defaultSettings.getInt(Constants.DELAY_VALUE));
+            if (Integer.valueOf(changes.getString(Constants.DELAY_VALUE)) < 1 || Integer.valueOf(changes.getString(Constants.DELAY_VALUE)) > 2000) {
+                changes.putString(Constants.DELAY_VALUE, defaultSettings.getString(Constants.DELAY_VALUE));
             }
         } catch (Exception e) {
-            changes.putInt(Constants.DELAY_VALUE, defaultSettings.getInt(Constants.DELAY_VALUE));
+            changes.putString(Constants.DELAY_VALUE, defaultSettings.getString(Constants.DELAY_VALUE));
         }
 
         //Validate Char
-        if (Character.isWhitespace(changes.getString(Constants.DISPLAY_CHAR).charAt(0))) {
-            changes.putChar(Constants.DISPLAY_CHAR, defaultSettings.getChar(Constants.DISPLAY_CHAR));
+        if (changes.getString(Constants.DISPLAY_CHAR).length() < 1 || Character.isWhitespace(changes.getString(Constants.DISPLAY_CHAR).charAt(0))) {
+            changes.putString(Constants.DISPLAY_CHAR, defaultSettings.getString(Constants.DISPLAY_CHAR));
         }
 
         //Validate Text Size
         try {
-            if (Float.valueOf(changes.getString("TEXT_SIZE")) < 1) {
+            if (Float.valueOf(changes.getString("TEXT_SIZE")) < 1 || Float.valueOf(changes.getString("TEXT_SIZE")) > 100) {
                 changes.putString(Constants.TEXT_SIZE, defaultSettings.getString(Constants.TEXT_SIZE));
             }
         } catch (Exception e) {
@@ -280,5 +280,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         currentSettings = changes;
+        System.out.println(currentSettings);
     }
 }
