@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Primes Pillar</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="menu_pause_resume">Pause / Resume</string>
-    <string name="seed_value">"Seed Value"</string>
-    <string name="delay_millis">"Delay"</string>
-    <string name="char_size">"Character Size"</string>
+    <string name="menu_pause_resume">Pause</string>
+    <string name="seed_value">"Seed Value (0 - 1844674407370955161)"</string>
+    <string name="delay_millis">"Delay (1 - 2000)"</string>
+    <string name="char_size">"Character Size (1 - 100)"</string>
     <string name="display_char">"Display Character"</string>
     <string name="foreground_colour">"Character Colour"</string>
     <string name="background_colour">"Background Colour"</string>

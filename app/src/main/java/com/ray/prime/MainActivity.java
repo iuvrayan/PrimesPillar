@@ -13,11 +13,14 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.math.BigInteger;
 
@@ -57,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         textView = findViewById(R.id.textView);
+
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -125,26 +130,26 @@ public class MainActivity extends AppCompatActivity {
         bufferCounter = new BigInteger(currentSettings.getString(Constants.SEED));
         displayCounter = bufferCounter;
 
-        DELAY = Integer.valueOf(currentSettings.getString(Constants.DELAY_VALUE));
+        DELAY = Integer.parseInt(currentSettings.getString(Constants.DELAY_VALUE));
 
         SYMBOL = currentSettings.getString(Constants.DISPLAY_CHAR).charAt(0);
         ALL_STARS = new String(new char[]{SYMBOL, SYMBOL, SYMBOL, SYMBOL, '\n'});
         lastAllStars = BigInteger.ZERO;
 
-        textView.setTextSize(Float.valueOf(currentSettings.getString(Constants.TEXT_SIZE)));
+        textView.setTextSize(Float.parseFloat(currentSettings.getString(Constants.TEXT_SIZE)));
         textView.setTextColor(Color.parseColor(currentSettings.getString(Constants.TEXT_CLR)));
 
         Display display = getWindowManager().getDefaultDisplay();
         Point displaySize = new Point();
         display.getSize(displaySize);
         int height = displaySize.y;
-        System.out.println("Height: "+height);
+        //System.out.println("Height: "+height);
 
         int bufferLines = height / Float.valueOf(currentSettings.getString(Constants.TEXT_SIZE)).intValue();
         if (bufferLines == 0) {
             bufferLines = 10;
         }
-        System.out.println("Buffer Lines: "+ bufferLines);
+        //System.out.println("Buffer Lines: "+ bufferLines);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i< bufferLines; i++) {
@@ -188,6 +193,11 @@ public class MainActivity extends AppCompatActivity {
             settingsLauncher.launch(currentSettings);
         } else if (item.getItemId() == R.id.pause_resume_menu_item) {
             isPaused = !isPaused;
+            if(isPaused) {
+                item.setTitle("Resume");
+            } else {
+                item.setTitle("Pause");
+            }
         }
         return true;
     }
@@ -197,7 +207,8 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    validateAndChangeSettings(result.getData().getExtras());
+                    //validateAndChangeSettings(result.getData().getExtras());
+                    currentSettings = result.getData().getExtras();
                     init();
                     isPaused = false;
                 }
@@ -236,50 +247,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return sb.toString();
-    }
-
-    public void validateAndChangeSettings(Bundle changes) {
-        //Validate Seed
-        try {
-            BigInteger value = new BigInteger(changes.getString("SEED"));
-            if (value.compareTo(BigInteger.ZERO) < 0 || value.compareTo(LIMIT) > 0) {
-                changes.putString(Constants.SEED, defaultSettings.getString(Constants.SEED));
-            }
-        } catch (Exception e) {
-            changes.putString(Constants.SEED, defaultSettings.getString(Constants.SEED));
-        }
-
-        //Validate Delay
-        try {
-            if (Integer.valueOf(changes.getString(Constants.DELAY_VALUE)) < 1 || Integer.valueOf(changes.getString(Constants.DELAY_VALUE)) > 2000) {
-                changes.putString(Constants.DELAY_VALUE, defaultSettings.getString(Constants.DELAY_VALUE));
-            }
-        } catch (Exception e) {
-            changes.putString(Constants.DELAY_VALUE, defaultSettings.getString(Constants.DELAY_VALUE));
-        }
-
-        //Validate Char
-        if (changes.getString(Constants.DISPLAY_CHAR).length() < 1 || Character.isWhitespace(changes.getString(Constants.DISPLAY_CHAR).charAt(0))) {
-            changes.putString(Constants.DISPLAY_CHAR, defaultSettings.getString(Constants.DISPLAY_CHAR));
-        }
-
-        //Validate Text Size
-        try {
-            if (Float.valueOf(changes.getString("TEXT_SIZE")) < 1 || Float.valueOf(changes.getString("TEXT_SIZE")) > 100) {
-                changes.putString(Constants.TEXT_SIZE, defaultSettings.getString(Constants.TEXT_SIZE));
-            }
-        } catch (Exception e) {
-            changes.putString(Constants.TEXT_SIZE, defaultSettings.getString(Constants.TEXT_SIZE));
-        }
-
-        //Validate Text Colour
-        try {
-            Color.parseColor(changes.getString(Constants.TEXT_CLR));
-        } catch (Exception e) {
-            changes.putString(Constants.TEXT_CLR, defaultSettings.getString(Constants.TEXT_CLR));
-        }
-
-        currentSettings = changes;
-        System.out.println(currentSettings);
     }
 }
