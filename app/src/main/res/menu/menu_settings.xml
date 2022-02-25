@@ -11,4 +11,9 @@
         android:checkable="false"
         android:title="@string/title_activity_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/help_menu_item"
+        android:checkable="false"
+        android:title="Help"
+        app:showAsAction="never" />
 </menu>

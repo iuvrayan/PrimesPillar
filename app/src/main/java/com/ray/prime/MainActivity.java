@@ -183,6 +183,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finishAffinity();
+        } else if (item.getItemId() == R.id.help_menu_item){
+            Intent helpIntent = new Intent(this, HelpActivity.class);
+            startActivity(helpIntent);
         } else if (item.getItemId() == R.id.settings_menu_item){
             isPaused = true;
             Intent currentSettings = new Intent(this, SettingsActivity.class);
@@ -208,7 +211,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     //validateAndChangeSettings(result.getData().getExtras());
-                    currentSettings = result.getData().getExtras();
+                    if (result.getData() != null) {
+                        currentSettings = result.getData().getExtras();
+                    }
                     init();
                     isPaused = false;
                 }
