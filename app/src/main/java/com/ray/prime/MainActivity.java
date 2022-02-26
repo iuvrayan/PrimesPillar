@@ -237,7 +237,8 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         for (BigInteger u : UNITS) {
             BigInteger v = bufferCounter.multiply(BigInteger.TEN).add(u);
-            if (v.isProbablePrime(Integer.MAX_VALUE)) {
+            //if (v.isProbablePrime(Integer.MAX_VALUE)) {
+            if (v.isProbablePrime(1)) {
                 sb.append(SYMBOL);
             } else {
                 sb.append('\u0020');
