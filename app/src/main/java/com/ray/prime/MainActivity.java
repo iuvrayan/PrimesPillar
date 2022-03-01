@@ -19,7 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.apache.commons.math3.primes.Primes;
+//import org.apache.commons.math3.primes.Primes;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,8 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
     final int LIMIT = Integer.MAX_VALUE / 10;
 
+    boolean[] primes = new boolean[(int)Math.sqrt(Integer.MAX_VALUE) + 1];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        sieve();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -221,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         for (int u : UNITS) {
             int v = i * 10 + u;
 
-            if (Primes.isPrime(v)) {
+            if (v > 0 && isPrime(v)) {
                 sb.append(SYMBOL);
             } else {
                 sb.append('\u0020');
@@ -231,10 +235,6 @@ public class MainActivity extends AppCompatActivity {
         sb.append('\n');
 
         return sb.toString();
-    }
-
-    public void updateText(String text) {
-
     }
 
     public void updateActionBar() {
@@ -260,6 +260,41 @@ public class MainActivity extends AppCompatActivity {
         if (bufferCounter > LIMIT) {
             bufferCounter = 0;
             //displayCounter = 0;
+        }
+    }
+
+    boolean isPrime(int n) {
+        if (n < primes.length) {
+            return primes[n];
+        }
+
+        int v = (int)Math.sqrt(n);
+        //System.out.println(v);
+
+        for (int i=2; i<=v; i++) {
+            if (primes[i]) {
+                if (n%i == 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    void sieve() {
+        for (int i=2; i<primes.length; i++) {
+            primes[i] = true;
+        }
+        for (int i=2; i< primes.length; i++) {
+            if (primes[i]) {
+                int v = i * i;
+                if (v > 0) {
+                    for (int j = v; j < primes.length; j += i) {
+                        primes[j] = false;
+                    }
+                }
+            }
         }
     }
 }

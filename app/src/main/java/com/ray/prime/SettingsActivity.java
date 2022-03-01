@@ -69,16 +69,26 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            //System.out.println("GOING BACK");
-            Intent settings = new Intent(this, SettingsActivity.class);
-            if(!isValidInput()) {
-                Toast.makeText(getApplicationContext(), "Invalid settings restored to default values", Toast.LENGTH_SHORT).show();
-            }
-            settings.putExtras(currentSettings);
-            setResult(RESULT_OK, settings);
-            finish();
+            goBack();
         }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        System.out.println("BACK PRESSED");
+        //System.out.println("GOING BACK");
+        goBack();
+    }
+
+    public void goBack() {
+        Intent settings = new Intent(this, SettingsActivity.class);
+        if(!isValidInput()) {
+            Toast.makeText(getApplicationContext(), "Invalid settings restored to default values", Toast.LENGTH_SHORT).show();
+        }
+        settings.putExtras(currentSettings);
+        setResult(RESULT_OK, settings);
+        finish();
     }
 
     public boolean isValidInput() {
