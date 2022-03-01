@@ -25,7 +25,7 @@ public class SettingsActivity extends AppCompatActivity {
     Button   btnReset;
     Bundle defaultSettings;
     Bundle currentSettings;
-    final BigInteger LIMIT = new BigInteger("2").pow(64).divide(BigInteger.TEN);
+    final int LIMIT = Integer.MAX_VALUE / 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +88,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         //Validate Seed
         try {
-            BigInteger value = new BigInteger(currentSettings.getString(Constants.SEED));
-            if (value.compareTo(BigInteger.ZERO) < 0 || value.compareTo(LIMIT) > 0) {
+            int limit = Integer.parseInt(currentSettings.getString(Constants.SEED));
+            if (limit < 0 || limit > LIMIT) {
                 currentSettings.putString(Constants.SEED, defaultSettings.getString(Constants.SEED));
                 isValid = false;
             }
@@ -100,7 +100,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         //Validate Delay
         try {
-            if (Integer.parseInt(currentSettings.getString(Constants.DELAY_VALUE)) < 1 || Integer.parseInt(currentSettings.getString(Constants.DELAY_VALUE)) > 2000) {
+            int delayValue = Integer.parseInt(currentSettings.getString(Constants.DELAY_VALUE));
+            if (delayValue < 1 || delayValue > 5000) {
                 currentSettings.putString(Constants.DELAY_VALUE, defaultSettings.getString(Constants.DELAY_VALUE));
                 isValid = false;
             }
@@ -110,14 +111,16 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         //Validate Char
-        if (currentSettings.getString(Constants.DISPLAY_CHAR).length() < 1 || Character.isWhitespace(currentSettings.getString(Constants.DISPLAY_CHAR).charAt(0))) {
+        String displayChar = currentSettings.getString(Constants.DISPLAY_CHAR);
+        if (displayChar.length() < 1 || Character.isWhitespace(displayChar.charAt(0))) {
             currentSettings.putString(Constants.DISPLAY_CHAR, defaultSettings.getString(Constants.DISPLAY_CHAR));
             isValid = false;
         }
 
         //Validate Text Size
         try {
-            if (Float.parseFloat(currentSettings.getString(Constants.TEXT_SIZE)) < 1 || Float.parseFloat(currentSettings.getString(Constants.TEXT_SIZE)) > 100) {
+            float textSize = Float.parseFloat(currentSettings.getString(Constants.TEXT_SIZE));
+            if (textSize < 1 || textSize > 100) {
                 currentSettings.putString(Constants.TEXT_SIZE, defaultSettings.getString(Constants.TEXT_SIZE));
                 isValid = false;
             }

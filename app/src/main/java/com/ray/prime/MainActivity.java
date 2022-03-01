@@ -1,5 +1,17 @@
 package com.ray.prime;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Display;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.widget.TextView;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -7,30 +19,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.Display;
-import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.math.BigInteger;
+import org.apache.commons.math3.primes.Primes;
 
 public class MainActivity extends AppCompatActivity {
 
-    private BigInteger bufferCounter;
+    private int bufferCounter;
 
-    private BigInteger displayCounter;
+    private int displayCounter;
 
-    private BigInteger lastAllStars;
+    private int lastAllStars;
 
     private int DELAY;
 
@@ -44,17 +41,12 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isPaused = false;
 
-    private Bundle defaultSettings = new Bundle();
+    private final Bundle defaultSettings = new Bundle();
     private Bundle currentSettings;
 
-    private final BigInteger[] UNITS = new BigInteger[]{
-            new BigInteger("1"),
-            new BigInteger("3"),
-            new BigInteger("7"),
-            new BigInteger("9")
-    };
+    private final int[] UNITS = new int[]{1, 3, 7, 9};
 
-    private final BigInteger LIMIT = new BigInteger("2").pow(64).divide(BigInteger.TEN);
+    final int LIMIT = Integer.MAX_VALUE / 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,33 +84,30 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if (!isPaused) {
                     StringBuilder sb = new StringBuilder(textView.getText());
-                    sb.append(getNextPattern());
+
                     sb.delete(0, 5);
-                    textView.setText(sb.toString());
-
-                    displayCounter = displayCounter.add(BigInteger.ONE);
-
+                    updateDisplayCounter();
                     if (sb.substring(0, 5).equals(ALL_STARS)) {
                         lastAllStars = displayCounter;
                     }
 
-                    if (actionBar != null) {
-                        sb = new StringBuilder();
-                        sb.append(lastAllStars);
-                        sb.append(Constants.SEPARATOR);
-                        sb.append(displayCounter);
-                        actionBar.setTitle(sb.toString());
-                    }
+                    sb.append(getPattern(bufferCounter));
+                    updateBufferCounter();
+
+                    textView.setText(sb.toString());
+
+                    updateActionBar();
                 }
                 handler.postDelayed(this, DELAY);
             }
+
         }
 
         handler.post(new RunnableTextView(handler, textView));
     }
 
     public void setDefaultSettings() {
-        defaultSettings.putString(Constants.SEED, BigInteger.ZERO.toString());
+        defaultSettings.putString(Constants.SEED, "0");
         defaultSettings.putString(Constants.DELAY_VALUE, "150");
         defaultSettings.putString(Constants.DISPLAY_CHAR, "*");
         defaultSettings.putString(Constants.TEXT_SIZE, "14");
@@ -127,14 +116,14 @@ public class MainActivity extends AppCompatActivity {
 
     // This method is used for initialising the textView state after changing the settings.
     public void init() {
-        bufferCounter = new BigInteger(currentSettings.getString(Constants.SEED));
+        bufferCounter = Integer.parseInt(currentSettings.getString(Constants.SEED));
         displayCounter = bufferCounter;
 
         DELAY = Integer.parseInt(currentSettings.getString(Constants.DELAY_VALUE));
 
         SYMBOL = currentSettings.getString(Constants.DISPLAY_CHAR).charAt(0);
         ALL_STARS = new String(new char[]{SYMBOL, SYMBOL, SYMBOL, SYMBOL, '\n'});
-        lastAllStars = BigInteger.ZERO;
+        lastAllStars = 0;
 
         textView.setTextSize(Float.parseFloat(currentSettings.getString(Constants.TEXT_SIZE)));
         textView.setTextColor(Color.parseColor(currentSettings.getString(Constants.TEXT_CLR)));
@@ -152,24 +141,17 @@ public class MainActivity extends AppCompatActivity {
         //System.out.println("Buffer Lines: "+ bufferLines);
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i< bufferLines; i++) {
-            String pattern = getNextPattern();
-            sb.append(pattern);
+        for (int i=0; i<bufferLines; i++) {
+            sb.append(getPattern(bufferCounter));
+            updateBufferCounter();
         }
-
-        textView.setText(sb.toString());
 
         if (sb.substring(0, 5).equals(ALL_STARS)) {
             lastAllStars = displayCounter;
         }
 
-        if (actionBar != null) {
-            sb = new StringBuilder();
-            sb.append(lastAllStars);
-            sb.append(Constants.SEPARATOR);
-            sb.append(displayCounter);
-            actionBar.setTitle(sb.toString());
-        }
+        textView.setText(sb.toString());
+        updateActionBar();
     }
 
     @Override
@@ -233,25 +215,51 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public String getNextPattern() {
+    public String getPattern(int i) {
         StringBuilder sb = new StringBuilder();
-        for (BigInteger u : UNITS) {
-            BigInteger v = bufferCounter.multiply(BigInteger.TEN).add(u);
-            //if (v.isProbablePrime(Integer.MAX_VALUE)) {
-            if (v.isProbablePrime(1)) {
+
+        for (int u : UNITS) {
+            int v = i * 10 + u;
+
+            if (Primes.isPrime(v)) {
                 sb.append(SYMBOL);
             } else {
                 sb.append('\u0020');
             }
         }
+
         sb.append('\n');
 
-        bufferCounter = bufferCounter.add(BigInteger.ONE);
-        if (bufferCounter.compareTo(LIMIT) > 0) {
-            bufferCounter = BigInteger.ZERO;
-            displayCounter = bufferCounter;
-        }
-
         return sb.toString();
+    }
+
+    public void updateText(String text) {
+
+    }
+
+    public void updateActionBar() {
+        if (actionBar != null) {
+            StringBuilder ab = new StringBuilder();
+            ab.append(lastAllStars);
+            ab.append(Constants.SEPARATOR);
+            ab.append(displayCounter);
+            actionBar.setTitle(ab.toString());
+        }
+    }
+
+    public void updateDisplayCounter() {
+        displayCounter++;
+        if (displayCounter > LIMIT) {
+            //bufferCounter = 0;
+            displayCounter = 0;
+        }
+    }
+
+    public void updateBufferCounter() {
+        bufferCounter++;
+        if (bufferCounter > LIMIT) {
+            bufferCounter = 0;
+            //displayCounter = 0;
+        }
     }
 }
