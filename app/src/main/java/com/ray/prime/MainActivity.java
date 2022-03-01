@@ -48,7 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
     final int LIMIT = Integer.MAX_VALUE / 10;
 
-    boolean[] primes = new boolean[(int)Math.sqrt(Integer.MAX_VALUE) + 1];
+    final int range = Integer.MAX_VALUE;
+    final int sqrt_limit = (int)Math.sqrt(range);
+    final int qurt_limit = (int)Math.sqrt(sqrt_limit);
+    boolean[] primes = new boolean[sqrt_limit + 1];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public String getPattern(int i) {
+    private String getPattern(int i) {
         StringBuilder sb = new StringBuilder();
 
         for (int u : UNITS) {
@@ -237,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
         return sb.toString();
     }
 
-    public void updateActionBar() {
+    private void updateActionBar() {
         if (actionBar != null) {
             StringBuilder ab = new StringBuilder();
             ab.append(lastAllStars);
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateDisplayCounter() {
+    private void updateDisplayCounter() {
         displayCounter++;
         if (displayCounter > LIMIT) {
             //bufferCounter = 0;
@@ -255,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateBufferCounter() {
+    private void updateBufferCounter() {
         bufferCounter++;
         if (bufferCounter > LIMIT) {
             bufferCounter = 0;
@@ -263,36 +266,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    boolean isPrime(int n) {
-        if (n < primes.length) {
+    private boolean isPrime(int n) {
+        if (n <= sqrt_limit) {
             return primes[n];
         }
 
         int v = (int)Math.sqrt(n);
-        //System.out.println(v);
 
         for (int i=2; i<=v; i++) {
-            if (primes[i]) {
-                if (n%i == 0) {
-                    return false;
-                }
+            if (primes[i] && n%i == 0) {
+                return false;
             }
         }
 
         return true;
     }
 
-    void sieve() {
-        for (int i=2; i<primes.length; i++) {
-            primes[i] = true;
-        }
-        for (int i=2; i< primes.length; i++) {
+    private void sieve() {
+        for (int i = 2; i<= qurt_limit; i++) {
             if (primes[i]) {
-                int v = i * i;
-                if (v > 0) {
-                    for (int j = v; j < primes.length; j += i) {
-                        primes[j] = false;
-                    }
+                for (int j = i*i; j <= sqrt_limit; j += i) {
+                    primes[j] = false;
                 }
             }
         }
