@@ -76,8 +76,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        System.out.println("BACK PRESSED");
-        //System.out.println("GOING BACK");
         goBack();
     }
 

@@ -177,12 +177,13 @@ public class MainActivity extends AppCompatActivity {
             startActivity(helpIntent);
         } else if (item.getItemId() == R.id.settings_menu_item){
             isPaused = true;
-            Intent currentSettings = new Intent(this, SettingsActivity.class);
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
             Bundle preferences = new Bundle();
             preferences.putBundle(Constants.DEFAULTS, defaultSettings);
+            currentSettings.putString(Constants.SEED, Integer.toString(displayCounter));
             preferences.putBundle(Constants.CURRENTS, this.currentSettings);
-            currentSettings.putExtras(preferences);
-            settingsLauncher.launch(currentSettings);
+            settingsIntent.putExtras(preferences);
+            settingsLauncher.launch(settingsIntent);
         } else if (item.getItemId() == R.id.pause_resume_menu_item) {
             isPaused = !isPaused;
             if(isPaused) {
@@ -220,6 +221,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
     }
 
     private String getPattern(int i) {
@@ -283,6 +289,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sieve() {
+        for(int i=2; i<primes.length; i++) {
+            primes[i] = true;
+        }
+
         for (int i = 2; i<= qurt_limit; i++) {
             if (primes[i]) {
                 for (int j = i*i; j <= sqrt_limit; j += i) {
